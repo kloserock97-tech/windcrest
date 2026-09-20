@@ -1,0 +1,53 @@
+[
+ {
+  "eval": "document.querySelectorAll(\".hud,.credit,.stats\").forEach(e=>e.style.display=\"none\"); windcrest.gui.hide();"
+ },
+ {
+  "wait": 400
+ },
+ {
+  "eval": "windcrest.load({...windcrest.DEFAULTS,...windcrest.PRESETS[\"sunset\"],autoRotate:false}); windcrest.camera.position.set(1.2,3.4,16.5); windcrest.controls.update();"
+ },
+ {
+  "wait": 2500
+ },
+ {
+  "shot": "preset-sunset"
+ },
+ {
+  "eval": "windcrest.load({...windcrest.DEFAULTS,...windcrest.PRESETS[\"midday\"],autoRotate:false}); windcrest.camera.position.set(1.2,3.4,16.5); windcrest.controls.update();"
+ },
+ {
+  "wait": 2500
+ },
+ {
+  "shot": "preset-midday"
+ },
+ {
+  "eval": "windcrest.load({...windcrest.DEFAULTS,...windcrest.PRESETS[\"gale\"],autoRotate:false}); windcrest.camera.position.set(1.2,3.4,16.5); windcrest.controls.update();"
+ },
+ {
+  "wait": 2500
+ },
+ {
+  "shot": "preset-gale"
+ },
+ {
+  "eval": "windcrest.load({...windcrest.DEFAULTS,...windcrest.PRESETS[\"august\"],autoRotate:false}); windcrest.camera.position.set(1.2,3.4,16.5); windcrest.controls.update();"
+ },
+ {
+  "wait": 2500
+ },
+ {
+  "shot": "preset-august"
+ },
+ {
+  "eval": "windcrest.load({...windcrest.DEFAULTS,...windcrest.PRESETS[\"moonlit\"],autoRotate:false}); windcrest.camera.position.set(1.2,3.4,16.5); windcrest.controls.update();"
+ },
+ {
+  "wait": 2500
+ },
+ {
+  "shot": "preset-moonlit"
+ }
+]

@@ -1,0 +1,20 @@
+{
+  "name": "windcrest",
+  "version": "1.0.0",
+  "description": "A hill of real grass blades: one instanced draw call, wind in the vertex shader, and every value on a live panel.",
+  "type": "module",
+  "license": "SEE LICENSE IN LICENSE",
+  "author": "Nikita Gorbachev",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "lil-gui": "^0.21.0",
+    "three": "^0.186.0"
+  },
+  "devDependencies": {
+    "vite": "^8.3.0"
+  }
+}
