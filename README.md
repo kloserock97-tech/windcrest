@@ -1,8 +1,8 @@
 # Windcrest
 
-A hill where every blade of grass is real geometry. A few hundred thousand blades, one instanced draw
-call, and nothing animated on the CPU. Everything you can see is on a slider: how much grass there is
-and how it grows, what the wind does to it, how it is lit, and the two tricks that keep it from
+A hill where every blade of grass is real geometry. A few hundred thousand blades are drawn in one
+instanced call, and the CPU animates none of them. Everything you can see is on a slider: how much grass
+there is and how it grows, what the wind does to it, how it is lit, and the two tricks that keep it from
 shimmering.
 
 **Live demo:** https://kloserock97-tech.github.io/windcrest/
@@ -14,39 +14,41 @@ taken out of the scene and put on a panel.
 
 ## The idea
 
-A blade is not a texture on a card. It is seven vertices with a little data attached: where it stands,
-which way it faces, how long it is, and which tuft it belongs to. That data is written once, when the
-meadow is planted, and never touched again.
+A blade is seven vertices with a little data attached: where it stands, which way it faces, how long it
+is, and which tuft it belongs to. That data is written once, when the meadow is planted, and the CPU
+does not touch it again.
 
-Every frame the vertex shader answers one question for each blade: where is the tip right now? The
-answer depends on the wind at that spot, on the cursor, and on the camera. There is no simulation and
-no state carried from frame to frame, which pays for most of the good behaviour:
+Every frame the vertex shader works out where the tip of each blade is, from the wind at that spot, the
+cursor and the camera. No state is carried from one frame to the next, and three things follow from
+that:
 
-- **The blade count is a slider.** 20 thousand or 600 thousand, the meadow looks the same, only denser.
-- **Time is a number.** Freeze it and the hill stops mid-gust, exactly as it was.
-- **The CPU does nothing per blade.** It uploads a clock and a wind direction. The draw call is one.
+- **The blade count is a slider.** At 20 thousand or at 600 thousand the meadow keeps its shape and only
+  gets denser.
+- **Time can be frozen.** Press `Space` and the hill stops in the middle of a gust.
+- **The CPU does no work per blade.** It uploads a clock and a wind direction, and the grass is one draw
+  call.
 
 ## How the meadow grows
 
-Blades are planted by rejection sampling. A random spot on the disc survives with the density the
-meadow should have there: slow noise thins some patches, and near the rim the grass fades out instead
-of stopping on a line.
+Blades are planted by rejection sampling. A random spot on the disc survives with the density the meadow
+should have there: slow noise thins some patches, and near the rim the grass fades out, so the meadow
+has no hard edge.
 
 Then each blade finds its cell in a jittered Voronoi grid, steps a little towards the cell centre and
-remembers how far to lean. Blades of one cell share a height and a tone. That is what turns a carpet
-into tufts with gaps between them, and **tuft size** and **lean into tufts** change it live.
+remembers how far to lean. Blades of one cell share a height and a tone. This turns a flat carpet into
+tufts with gaps between them. **Tuft size** and **lean into tufts** change it live.
 
-Length is 9 to 18 centimetres on purpose. Shorter grass is detail smaller than a pixel: the screen
-cannot show it, it can only shimmer.
+Blades are 9 to 18 centimetres long. Shorter grass is smaller than a pixel at this distance, and all the
+screen can do with it is shimmer.
 
 ## Wind
 
-The wind is not a sine wave rolling over the field. It is patches: two layers of value noise scroll
-downwind at different speeds and are thresholded, so there are calm areas between the gusts. A weak
-travelling wave stays underneath so the slope still reads as one surface.
+The wind comes in patches. Two layers of value noise scroll downwind at different speeds and are
+thresholded, which leaves calm areas between the gusts. A weak travelling wave stays underneath so the
+slope still reads as one surface.
 
 A blade keeps its length. The further the tip is pushed sideways, the lower it sits, so a gust flattens
-the grass instead of stretching it. Flattened blades also turn their pale underside up, and that is the
+the grass and never stretches it. Flattened blades also turn their pale underside up, and that is the
 silver patch you see running across the hill.
 
 The noise uses an integer hash. A sine-based hash loses precision at the coordinates blades live at,
@@ -54,8 +56,8 @@ and the wind starts to band.
 
 ## Two tricks against shimmer
 
-Thin geometry is the hardest thing to draw calmly. A blade that is half a pixel wide hits a pixel
-centre on one frame and misses it on the next, and no amount of antialiasing fixes that.
+Thin geometry is hard to draw calmly. A blade that is half a pixel wide hits a pixel centre on one frame
+and misses it on the next, and antialiasing does not fix that.
 
 1. **Minimum width in pixels.** The shader knows the size of a pixel at the blade's distance and never
    lets a blade get thinner than that. Set **min width** to zero to see what it prevents.
@@ -70,11 +72,11 @@ in pixels through `fwidth`, becomes a share of MSAA samples. A slanted blade sto
 Lighting is computed per vertex. Blades overlap several layers deep, so anything done per fragment is
 paid many times over. Three things make a flat ribbon read as grass:
 
-- a **rounded normal**: the edges of the ribbon look sideways and the middle looks forward, so the strip
-  shades like a round stem without extra geometry;
-- **light through the tips** when you look towards the sun, kept off the very tip, where it would
-  collect into a line of bright dots;
-- **self-shadowing**: almost no sky reaches the roots, so the turf has depth.
+- A **rounded normal**: the edges of the ribbon look sideways and the middle looks forward, so the strip
+  shades like a round stem without extra geometry.
+- **Light through the tips** when you look towards the sun. It is kept off the very tip, where it would
+  collect into a line of bright dots.
+- **Self-shadowing**: almost no sky reaches the roots, so the turf has depth.
 
 Far away the blade normal settles onto the slope normal, and light stops jumping from pixel to pixel.
 
@@ -108,8 +110,8 @@ shader, so the useful dials are **blades** and **blade shape**: a 3-vertex blade
 of a 7-vertex one, and at a distance you cannot tell them apart. The portfolio scene uses both at once,
 7 vertices near the camera and 3 further away.
 
-On an Intel Arc integrated GPU the defaults (380k blades, 7 vertices, MSAA) hold the 165 Hz refresh
-rate of the display at 1368×775; 600k blades run at about 130 fps.
+On an Intel Arc integrated GPU the defaults (380k blades, 7 vertices, MSAA) hold the 165 Hz refresh rate
+of the display at 1368×775. 600k blades run at about 130 fps.
 
 ## Running it
 
@@ -126,15 +128,15 @@ npm run preview
 
 Four files matter: `src/grass.glsl.js` is the grass, the ground and the sky as shader source,
 `src/terrain.js` is the hill and the Voronoi tufts, `src/main.js` plants the meadow and wires the panel,
-`src/settings.js` holds defaults, presets and the URL encoding. No models, no textures, no data files.
-The whole thing is code.
+`src/settings.js` holds defaults, presets and the URL encoding. The project has no models, textures or
+data files, only code.
 
 ## Prior art
 
 Instanced grass bent in the vertex shader is a common technique in real-time graphics. The talk
 "Procedural Grass in Ghost of Tsushima" (GDC 2021) is where the ideas of tufts, rounded normals and
-visible wind come from; it was used as a reference only. The construction here and all of the code are
-my own. Built with [three.js](https://threejs.org) and [lil-gui](https://lil-gui.georgealways.com).
+visible wind come from. I used it as a reference only. The construction here and all of the code are my
+own. Built with [three.js](https://threejs.org) and [lil-gui](https://lil-gui.georgealways.com).
 
 ## Licence
 
