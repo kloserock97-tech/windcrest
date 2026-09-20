@@ -65,8 +65,8 @@ export const PRESETS = {
         sunColor: "#ffdca8", skyColor: "#b9c7d8", fogColor: "#f0dcae", zenithColor: "#93b0cf", wind: 0.55, haze: 0.8, length: 1.2,
     },
     moonlit: {
-        sunElevation: 38, sunAzimuth: 215, sunColor: "#a9c4ff", sunPower: 0.9, skyColor: "#34466b", bounceColor: "#10160f",
-        ambient: 0.9, backLight: 0.5, fogColor: "#1a2436", zenithColor: "#070c18", haze: 0.9, exposure: 1.7, wind: 0.8,
+        sunElevation: 5.5, sunAzimuth: 170, sunColor: "#b9ceff", sunPower: 0.55, skyColor: "#34466b", bounceColor: "#10160f",
+        ambient: 1.15, backLight: 1.6, fogColor: "#1a2436", zenithColor: "#070c18", haze: 0.9, exposure: 1.6, wind: 0.8,
     },
 };
 

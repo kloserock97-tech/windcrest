@@ -1,0 +1,14 @@
+[
+ {
+  "eval": "document.querySelectorAll(\".hud,.credit,.stats\").forEach(e=>e.style.display=\"none\"); windcrest.gui.hide(); windcrest.load({...windcrest.DEFAULTS, autoRotate:false, paused:true, count: 520000, area: 9}); windcrest.controls.enabled=false; windcrest.camera.position.set(2.6,2.75,6.4); windcrest.controls.target.set(-0.2,2.15,0); windcrest.controls.update();"
+ },
+ {
+  "wait": 2500
+ },
+ {
+  "frames": 164,
+  "each": "windcrest.uniforms.uTime.value = 20 + i/24;",
+  "prefix": "f",
+  "settle": 70
+ }
+]
