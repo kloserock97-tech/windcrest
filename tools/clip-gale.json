@@ -1,0 +1,24 @@
+[
+ {
+  "eval": "document.querySelectorAll(\".hud,.credit,.stats\").forEach(e=>e.style.display=\"none\"); windcrest.gui.hide(); windcrest.load({...windcrest.DEFAULTS, ...windcrest.PRESETS.gale, autoRotate:false, paused:true, count: 520000, area: 9}); windcrest.controls.enabled=false; windcrest.camera.position.set(1.0,2.75,6.9); windcrest.controls.target.set(0.1,2.2,0); windcrest.controls.update();"
+ },
+ {
+  "wait": 2500
+ },
+ {
+  "frames": 164,
+  "each": "windcrest.uniforms.uTime.value = 20 + i/24*1.5;",
+  "prefix": "f",
+  "settle": 70
+ },
+ {
+  "eval": "windcrest.load({...windcrest.DEFAULTS, ...windcrest.PRESETS.gale})"
+ },
+ {
+  "wait": 400
+ },
+ {
+  "probe": "location.hash",
+  "as": "hash"
+ }
+]
