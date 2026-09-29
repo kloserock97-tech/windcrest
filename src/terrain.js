@@ -3,25 +3,30 @@
 
 export const HILL = { height: 2.3, spreadX: 6.8, spreadZ: 4.4 };
 
-/* Deterministic PRNG (mulberry32): the same meadow on every reload, a new one on "new seeds". */
+// Hash Kit (our own hash, see shelf/items/hash-kit)
+const SALT = 0xb31c96c9; // keeps cell (0, 0) away from the mixer's fixed point hashU(0) = 0
+
+function hashU(x)
+{
+    x ^= x >>> 16; x = Math.imul(x, 0x3f9c86cb);
+    x ^= x >>> 14; x = Math.imul(x, 0x1ae9dacf);
+    x ^= x >>> 15;
+    return x >>> 0;
+}
+const hash2U = (x, y) => hashU((x + hashU((y + SALT) >>> 0)) >>> 0);
+const hashUnit = (h) => (h >>> 8) / 16777216;
+const hash2 = (x, y) => hashUnit(hash2U(Math.floor(x), Math.floor(y)));
+
+/* Seeded random numbers, a Weyl sequence through the hash: the same meadow on every reload, a new one
+   on "new seeds". */
 export function makeRng(seed = 0x3f9a1c7b)
 {
-    let a = seed;
+    let s = seed >>> 0;
     return () =>
     {
-        a |= 0;
-        a = (a + 0x6d2b79f5) | 0;
-        let t = Math.imul(a ^ (a >>> 15), 1 | a);
-        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        s = (s + SALT) >>> 0;
+        return hashU(s) / 4294967296;
     };
-}
-
-function hash2(x, y)
-{
-    let n = Math.imul(x | 0, 374761393) + Math.imul(y | 0, 668265263);
-    n = Math.imul(n ^ (n >>> 13), 1274126177);
-    return ((n ^ (n >>> 16)) >>> 0) / 4294967296;
 }
 
 function vnoise(x, y)
@@ -82,7 +87,7 @@ export function voronoiCell(x, z, size, out)
         for(let dx = -1; dx <= 1; dx++)
         {
             const ix = gx + dx, iz = gz + dz;
-            const id = (Math.imul(ix, 73856093) ^ Math.imul(iz, 19349663)) >>> 0;
+            const id = hash2U(ix, iz);
             const cx = (ix + hash01(id, 7)) * size;
             const cz = (iz + hash01(id, 8)) * size;
             const d = (cx - x) * (cx - x) + (cz - z) * (cz - z);
@@ -94,9 +99,7 @@ export function voronoiCell(x, z, size, out)
 
 export function hash01(id, salt)
 {
-    let n = Math.imul(id ^ Math.imul(salt, 0x9e3779b1), 1274126177);
-    n = Math.imul(n ^ (n >>> 15), 0x85ebca6b);
-    return ((n ^ (n >>> 13)) >>> 0) / 4294967296;
+    return hashUnit(hash2U(id, salt));
 }
 
 export function smooth(a, b, x)

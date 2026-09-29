@@ -9,6 +9,21 @@
 
 export const TRAIL_SLOTS = 6;
 
+// Hash Kit (our own hash, see shelf/items/hash-kit)
+const HASH = /* glsl */ `
+const uint HASH_SALT = 0xb31c96c9u;
+uint hashU(uint x){
+  x ^= x >> 16; x *= 0x3f9c86cbu;
+  x ^= x >> 14; x *= 0x1ae9dacfu;
+  x ^= x >> 15;
+  return x;
+}
+uint hashU(uvec2 v){ return hashU(v.x + hashU(v.y + HASH_SALT)); }
+float hashUnit(uint h){ return float(h >> 8) * (1.0 / 16777216.0); }
+/* 0…1 for the cell a point falls into; negative coordinates are fine */
+float hash2(vec2 p){ return hashUnit(hashU(uvec2(ivec2(floor(p))))); }
+`;
+
 const COMMON = /* glsl */ `
 uniform vec3 uSunDir;
 uniform vec3 uSunCol;
@@ -47,16 +62,12 @@ uniform float uMinPixels;
 
 /* Integer hash. A sine-based hash loses precision at the coordinates blades live at and the wind
    starts to band; integer arithmetic does not care how far from the origin it is. */
-float hash12(vec2 p){
-  uvec2 q = uvec2(ivec2(floor(p))) * uvec2(1597334673u, 3812015801u);
-  uint n = (q.x ^ q.y) * 1597334673u;
-  return float(n) * (1.0 / 4294967295.0);
-}
+${HASH}
 float vnoise(vec2 p){
   vec2 f = fract(p);
   vec2 u = f * f * (3.0 - 2.0 * f);
-  return mix(mix(hash12(p), hash12(p + vec2(1.0, 0.0)), u.x),
-             mix(hash12(p + vec2(0.0, 1.0)), hash12(p + vec2(1.0, 1.0)), u.x), u.y);
+  return mix(mix(hash2(p), hash2(p + vec2(1.0, 0.0)), u.x),
+             mix(hash2(p + vec2(0.0, 1.0)), hash2(p + vec2(1.0, 1.0)), u.x), u.y);
 }
 
 /* Wind is not a sine wave rolling over the field. It is patches: two layers of noise scrolling
@@ -276,11 +287,11 @@ varying vec3 vW;
 varying vec3 vN;
 varying float vDist;
 
-float h21(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+${HASH}
 float n2(vec2 p){
   vec2 i = floor(p), f = fract(p);
   vec2 u = f * f * (3.0 - 2.0 * f);
-  return mix(mix(h21(i), h21(i + vec2(1, 0)), u.x), mix(h21(i + vec2(0, 1)), h21(i + vec2(1, 1)), u.x), u.y);
+  return mix(mix(hash2(i), hash2(i + vec2(1, 0)), u.x), mix(hash2(i + vec2(0, 1)), hash2(i + vec2(1, 1)), u.x), u.y);
 }
 
 void main(){
