@@ -1,6 +1,6 @@
 [
  {
-  "eval": "document.querySelectorAll(\".hud,.credit,.stats\").forEach(e=>e.style.display=\"none\"); windcrest.gui.hide();"
+  "eval": "document.querySelectorAll(\".hud,.credit,.stats,.pnl-bar\").forEach(e=>e.style.display=\"none\"); windcrest.gui.hide();"
  },
  {
   "wait": 400

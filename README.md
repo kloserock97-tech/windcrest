@@ -96,6 +96,10 @@ Far away the blade normal settles onto the slope normal, and light stops jumping
 
 `H` hides the panel, `Space` freezes time, drag to orbit, scroll to zoom, move the pointer over the grass.
 
+The settings sit in a sheet at the bottom of the page, one tab per group. Drag anywhere on a row to change a value,
+double-click it to type one, or use the arrow keys. The buttons in the top right switch between a light and a dark
+panel, fold the sheet and reset everything.
+
 Five presets are included (sunset, midday, gale, august, moonlit). **Copy link to this look** puts the
 whole setup in the address bar, so a version you liked can be sent to someone as a plain URL.
 
@@ -136,7 +140,7 @@ data files, only code.
 Instanced grass bent in the vertex shader is a common technique in real-time graphics. The talk
 "Procedural Grass in Ghost of Tsushima" (GDC 2021) is where the ideas of tufts, rounded normals and
 visible wind come from. I used it as a reference only. The construction here and all of the code are my
-own. Built with [three.js](https://threejs.org) and [lil-gui](https://lil-gui.georgealways.com).
+own, the settings panel (`src/panel/`) included. Built with [three.js](https://threejs.org).
 
 ## Licence
 

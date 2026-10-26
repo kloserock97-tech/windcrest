@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import GUI from "lil-gui";
+import GUI, { stageSize } from "./panel/panel.js";
 import { TRAIL_SLOTS, grassVertex, grassFragment, groundVertex, groundFragment, skyVertex, skyFragment } from "./grass.glsl.js";
 import { DEFAULTS, PRESETS, readUrl, writeUrl } from "./settings.js";
 import { heightAt, normalAt, voronoiCell, hash01, fbm, smooth, makeRng } from "./terrain.js";
@@ -234,8 +234,7 @@ let planted = 0;
 
 function resize()
 {
-    const width = innerWidth;
-    const height = innerHeight;
+    const { width, height } = stageSize();
 
     renderer.setSize(width, height);
     camera.aspect = width / height;
@@ -256,7 +255,7 @@ const lastDrop = new THREE.Vector3(1e6, 0, 0);
 let dragging = false;
 let slot = 0;
 
-canvas.addEventListener("pointermove", (event) => pointer.set((event.clientX / innerWidth) * 2 - 1, -(event.clientY / innerHeight) * 2 + 1));
+canvas.addEventListener("pointermove", (event) => pointer.set((event.clientX / innerWidth) * 2 - 1, -(event.clientY / stageSize().height) * 2 + 1));
 canvas.addEventListener("pointerdown", () => (dragging = true));
 addEventListener("pointerup", () => (dragging = false));
 canvas.addEventListener("pointerleave", () => pointer.set(2, 2));
@@ -304,7 +303,7 @@ function updateTrail(delta)
    In the order you would reach for it: how much grass there is and how it grows, what the wind does
    to it, how it is lit, what colour it is, and the two tricks that keep it from shimmering. */
 
-const gui = new GUI({ title: "Windcrest", width: 300 });
+const gui = new GUI({ title: "Windcrest", repo: "https://github.com/kloserock97-tech/windcrest", onReset: () => load(DEFAULTS), theme: "light" });
 const apply = () => { sync(); writeUrl(settings); };
 const replant = () => { plant(); apply(); };
 
@@ -338,7 +337,6 @@ sun.add(settings, "haze", 0, 2, 0.01).name("haze").onChange(apply);
 sun.addColor(settings, "fogColor").name("horizon").onChange(apply);
 sun.addColor(settings, "zenithColor").name("zenith").onChange(apply);
 sun.add(settings, "exposure", 0.3, 2.5, 0.01).name("exposure").onChange(apply);
-sun.close();
 
 const colour = gui.addFolder("Grass colour");
 colour.addColor(settings, "rootColor").name("root").onChange(apply);
@@ -346,19 +344,16 @@ colour.addColor(settings, "midColor").name("middle").onChange(apply);
 colour.addColor(settings, "tipColor").name("tip").onChange(apply);
 colour.addColor(settings, "dryColor").name("dry tips").onChange(apply);
 colour.add(settings, "dry", 0, 1, 0.01).name("share of dry blades").onChange(apply);
-colour.close();
 
 const quality = gui.addFolder("Anti-shimmer");
 quality.add(settings, "minPixels", 0, 2.5, 0.05).name("min width, px").onChange(apply);
 quality.add(settings, "coverage", 1, 6, 0.1).name("widen with distance").onChange(apply);
 quality.add(settings, "a2c").name("alpha to coverage").onChange(() => { grassMaterial.alphaToCoverage = settings.a2c; grassMaterial.needsUpdate = true; apply(); });
-quality.close();
 
 const view = gui.addFolder("View");
 view.add(settings, "autoRotate").name("orbit by itself").onChange(apply);
 view.add(settings, "rotateSpeed", -2, 2, 0.05).name("orbit speed").onChange(apply);
 view.add(settings, "paused").name("freeze time").onChange(apply).listen();
-view.close();
 
 const actions = {
     preset: "sunset",
@@ -374,14 +369,12 @@ const actions = {
         try { await navigator.clipboard.writeText(JSON.stringify(settings, null, 2)); toast("Settings copied"); }
         catch { toast("Copy failed"); }
     },
-    reset: () => load(DEFAULTS),
 };
 
 gui.add(actions, "preset", Object.keys(PRESETS)).name("preset").onChange((key) => load({ ...DEFAULTS, ...PRESETS[key] }));
 gui.add(actions, "reseed").name("new seeds");
 gui.add(actions, "copyLink").name("copy link to this look");
 gui.add(actions, "copySettings").name("copy settings as JSON");
-gui.add(actions, "reset").name("reset");
 
 function sync()
 {
